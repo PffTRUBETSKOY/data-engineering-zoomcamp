@@ -41,7 +41,7 @@ where "LocationID" =
     
 Task 6:
 select 
-    z1."Zone", z2."Zone"
+    CONCAT(z1."Zone", ' / ', z2."Zone")
 from 
     yellow_taxi_data as t1
 inner join 
