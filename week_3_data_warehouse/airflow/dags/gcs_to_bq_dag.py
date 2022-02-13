@@ -15,7 +15,7 @@ BIGQUERY_DATASET = os.environ.get("BIGQUERY_DATASET", 'trips_data_all')
 DATASET = "tripdata"
 COLOUR_RANGE = {'yellow': 'tpep_pickup_datetime', 'green': 'lpep_pickup_datetime'}
 INPUT_PART = "raw"
-INPUT_FILETYPE = "parquet"
+INPUT_FILETYPE = "PARQUET"
 
 default_args = {
     "owner": "airflow",
@@ -61,7 +61,7 @@ with DAG(
         )
 
         CREATE_BQ_TBL_QUERY = (
-            f"CREATE OR REPLACE TABLE {BIGQUERY_DATASET}.{colour}_{DATASET} \
+            f"CREATE OR REPLACE TABLE {BIGQUERY_DATASET}.{colour}_{DATASET}_all_partitioned_table \
             PARTITION BY DATE({ds_col}) \
             AS \
             SELECT * FROM {BIGQUERY_DATASET}.{colour}_{DATASET}_external_table;"
