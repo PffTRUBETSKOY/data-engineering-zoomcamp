@@ -1,25 +1,26 @@
 
 version: 2
+
 sources:
     - name: staging
+      #For bigquery:
+      #database: taxi-rides-ny-339813
+
+      # For postgres:
       database: production
-      schema: staging
 
-      #loaded_at_field: record_loaded_at
+      schema: trips_data_all
 
+      # loaded_at_field: record_loaded_at
       tables:
-        - name: fhv_tripdata_2021_01
-        - name: green_tripdata_2021_01
-        - name: yellow_tripdata_2021_01
-        - name: fhvhv_tripdata_2021_01
-          #freshness:
-            #error_after: {count: 24, period: hour}
+        - name: fhv_tripdata_2019_part_clust
+        - name: green_tripdata_all_partitioned 
+        - name: yellow_tripdata_all_partitioned_table
+         # freshness:
+           # error_after: {count: 6, period: hour}
 
 models:
-    - name: stg_fhbhv_tripdata
-    - name: stg_fhv_tripdata
-
-    - name: stg_green_tripdata
+    - name: green_tripdata_all_partitioned
       description: >
         Trip made by green taxis, also known as boro taxis and street-hail liveries.
         Green taxis may respond to street hails,but only in the areas indicated in green on the
@@ -83,12 +84,13 @@ models:
           - name: Payment_type 
             description: >
               A numeric code signifying how the passenger paid for the trip.
-          - name: payment_type_description
-            description: Description of the payment_type code
             tests: 
               - accepted_values:
                   values: "{{ var('payment_type_values') }}"
                   severity: warn
+                  quote: false
+          - name: payment_type_description
+            description: Description of the payment_type code
           - name: Fare_amount 
             description: > 
               The time-and-distance fare calculated by the meter.
@@ -109,7 +111,7 @@ models:
           - name: Total_amount 
             description: The total amount charged to passengers. Does not include cash tips.
 
-    - name: stg_yellow_tripdata
+    - name: yellow_tripdata_all_partitioned_table
       description: > 
         Trips made by New York City's iconic yellow taxis. 
         Yellow taxis are the only vehicles permitted to respond to a street hail from a passenger in all five
@@ -174,12 +176,13 @@ models:
           - name: Payment_type 
             description: >
               A numeric code signifying how the passenger paid for the trip.
-          - name: payment_type_description
-            description: Description of the payment_type code
             tests: 
               - accepted_values:
                   values: "{{ var('payment_type_values') }}"
                   severity: warn
+                  quote: false
+          - name: payment_type_description
+            description: Description of the payment_type code
           - name: Fare_amount 
             description: > 
               The time-and-distance fare calculated by the meter.
@@ -199,5 +202,3 @@ models:
             description: Total amount of all tolls paid in trip.
           - name: Total_amount 
             description: The total amount charged to passengers. Does not include cash tips.
-
-

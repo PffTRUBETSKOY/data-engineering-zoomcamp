@@ -1,16 +1,29 @@
 {{ config(materialized='view') }}
 
-
+with tripdata as 
+(
+  select *,
+    row_number() over(partition by dispatching_base_num, pickup_datetime) as rn
+  from {{ source('staging', 'fhv_tripdata_2019_part_clust') }} 
+  where dispatching_base_num is not null 
+)
 select
-    dispatching_base_num::varchar,
-    pickup_datetime::timestamp without time zone,
-    dropoff_datetime::timestamp without time zone,
-    pulocationid::integer,
-    dolocationid::integer,
-    sr_flag::integer,
-    affiliated_base_number::varchar
+    -- identifiers
+    {{ dbt_utils.surrogate_key(['dispatching_base_num', 'pickup_datetime']) }} as tripid,
+    cast(dispatching_base_num as string) as dispatching_base_num,
+    cast(pulocationid as integer) as  pickup_locationid,
+    cast(dolocationid as integer) as dropoff_locationid,
+    
+    -- timestamps
+    cast(pickup_datetime as timestamp) as pickup_datetime,
+    cast(dropoff_datetime as timestamp) as dropoff_datetime,
+    
+    -- trip info
+    cast(0 as numeric) as sr_flag,
 
-from {{ source('staging','fhv_tripdata_2021_01') }}
+from tripdata
+where rn = 1
+
 
 -- dbt build --m <model.sql> --var 'is_test_run: false'
 {% if var('is_test_run', default=true) %}
